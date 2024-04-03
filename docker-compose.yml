@@ -1,0 +1,36 @@
+version: '3'
+
+volumes:
+  postgres_data_vol:
+    external: false
+
+services:
+  postgresql:
+    image: postgres:15
+    environment:
+      POSTGRES_DB: etherpad
+      POSTGRES_USER: etherpaduser
+      POSTGRES_PASSWORD: etherpadpass
+    volumes:
+      - postgres_data_vol:/var/lib/postgresql/data/
+    restart: always
+
+  etherpad:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - 9001:9001
+    environment:
+      DB_HOST: postgresql
+      DB_NAME: etherpad
+      DB_PASS: etherpadpass
+      DB_PORT: 5432
+      DB_TYPE: postgres
+      DB_USER: etherpaduser
+      LOGLEVEL: "debug"
+    volumes:
+      - ./demo/settings.json:/opt/etherpad-lite/settings.json:ro
+    depends_on:
+      - postgresql
+    restart: always

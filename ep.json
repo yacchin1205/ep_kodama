@@ -1,0 +1,16 @@
+{
+  "parts":[
+    {
+      "name": "ep_kodama",
+      "hooks": {
+        "expressCreateServer" : "ep_kodama/lib/index:registerRoute",
+        "eejsBlock_styles": "ep_kodama/lib/client"
+      },
+      "client_hooks": {
+        "postAceInit": "ep_kodama/static/js/assist",
+        "aceEditEvent": "ep_kodama/static/js/assist",
+        "acePostWriteDomLineHTML": "ep_kodama/static/js/assist"
+      }
+    }
+  ]
+}

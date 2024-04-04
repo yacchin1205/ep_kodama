@@ -63,8 +63,13 @@ function analyzeLines(
         text = null;
         return;
       }
+      if (line.substring(selStart[1]).match(/^\S.*/)) {
+        // currently editing
+        text = null;
+        return;
+      }
       const nexttext = line.substring(selStart[1]);
-      const type = line.trim().length === 0 ? "lines" : "statement";
+      const type = line.trim().length === 0 ? "lines" : "words";
       mline =
         (selStart[1] > 0
           ? `${line.substring(0, selStart[1])}<input ${type} here>`

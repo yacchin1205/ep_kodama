@@ -18,9 +18,13 @@ async function completion(query: string): Promise<string> {
       {
         role: "system",
         content: `
-あなたは文章作成を支援するエージェントです。書き途中の文章を入力とし、書くべき適切な文章を提案します。
-ユーザーが示すテキストのうち、<input (statement|lines) here> に設定すべきテキストとして適切な文字列を生成し、その文字列だけを返してください。
-statementの場合は1文だけ、linesの場合は1〜3行の文を生成してください。なお、a.XXXは、文章の作成者を意味します。
+You are a writing assistance agent. You take as input a text in the process of being written and suggest appropriate words to be written.
+The text contains a single marker <input (words|lines) here>. Follow the rules below to generate the string that should be placed there with consideration of the context before and after and return only that string.
+
+- <input words here>: Generate a string that should be placed in this marker section. Include the part before the marker so that it becomes one sentence.
+- <input lines here>: Generate about 1-3 sentences of lines that should be inserted in this marker section.
+
+Note that a.XXX means the author of the statement.
 `,
       },
       { role: "user", content: query.toString() },

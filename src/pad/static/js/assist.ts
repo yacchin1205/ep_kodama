@@ -23,7 +23,7 @@ let completionResult: string | null = null;
 let lastCompletionLine: JQuery | null = null;
 let keyPressHandlerAttached = false;
 
-function analyzeLines(
+export function analyzeLines(
   currentAuthor: string,
   rep: Rep
 ): CompletionContext | null {

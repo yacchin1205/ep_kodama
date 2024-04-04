@@ -1,0 +1,6 @@
+demo/**
+.DS_Store
+Dockerfile
+docker-compose.*
+
+ep_kodama-*

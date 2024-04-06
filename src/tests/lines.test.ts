@@ -1,5 +1,5 @@
 import { describe, expect, test } from "@jest/globals";
-import { DOMLines } from "../pad/static/js/lines";
+import { DOMLines } from "../static/js/lines";
 
 describe("DOMLines", () => {
   test("empty lines", () => {

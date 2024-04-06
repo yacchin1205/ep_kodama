@@ -1,5 +1,5 @@
 import { describe, expect, test } from "@jest/globals";
-import { analyzeLines } from "../pad/static/js/assist";
+import { analyzeLines } from "../static/js/assist";
 
 describe("analyzeLines", () => {
   test("empty lines", () => {

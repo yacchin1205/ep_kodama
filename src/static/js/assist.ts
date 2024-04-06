@@ -20,7 +20,10 @@ let lastContext: CompletionContext | null = null;
 let lineDOMNodes: DOMLines = new DOMLines();
 let completionMarker: JQuery | null = null;
 let completionResult: string | null = null;
-let lastCompletionLine: JQuery | null = null;
+let lastCompletionLine: {
+  element: JQuery;
+  appendText: (text: string) => void;
+} | null = null;
 let keyPressHandlerAttached = false;
 
 export function analyzeLines(
@@ -113,20 +116,13 @@ function attachKeyPressHandler(context: AceEditEventContext) {
   if (keyPressHandlerAttached) {
     return;
   }
-  const { editorInfo } = context;
+  const { editorInfo, rep } = context;
   const { ace_setOnKeyDown } = editorInfo;
   if (!ace_setOnKeyDown) {
     return;
   }
   ace_setOnKeyDown((event) => {
     // check the key code is tab
-    console.log(
-      logPrefix,
-      "Keydown",
-      event,
-      completionResult,
-      lastCompletionLine
-    );
     if (event.keyCode !== 9) {
       return;
     }
@@ -142,7 +138,28 @@ function attachKeyPressHandler(context: AceEditEventContext) {
     event.preventDefault();
     event.stopPropagation();
     completionMarker?.hide();
-    lastCompletionLine.after($("<span>").text(completionResult));
+    lastCompletionLine.appendText(completionResult);
+    if (!editorInfo.editor) {
+      throw new Error("editor is not set");
+    }
+    const lastCompletionResult = completionResult;
+    editorInfo.editor.callWithAce(
+      (ace) => {
+        if (!rep.selStart || !rep.selEnd) {
+          throw new Error("selStart or selEnd is not set");
+        }
+        if (!ace.ace_performSelectionChange) {
+          throw new Error("ace_performSelectionChange is not set");
+        }
+        ace.ace_performSelectionChange(
+          [rep.selStart[0], rep.selStart[1] + lastCompletionResult.length],
+          [rep.selEnd[0], rep.selEnd[1] + lastCompletionResult.length],
+          true
+        );
+      },
+      "kodama_completion",
+      true
+    );
     completionResult = null;
     lastCompletionLine = null;
   });
@@ -210,7 +227,7 @@ exports.aceEditEvent = (hook: string, context: AceEditEventContext) => {
     });
     completionMarker.text("Loading...");
     completionMarker.show();
-    lastCompletionLine = location.element;
+    lastCompletionLine = location;
     requestCompletion(analyzed.query)
       .then((data) => {
         if (!completionContextEquals(lastContext, analyzed)) {

@@ -1,9 +1,9 @@
-export enum PosType {
-  Left,
-  Right,
-}
-
 const SUPPORT_COMPLETION_MARKER = false;
+
+export type LineMarker = {
+  element: JQuery;
+  appendText: (text: string) => void;
+};
 
 export class DOMLines {
   private allLines: JQuery[];
@@ -39,21 +39,33 @@ export class DOMLines {
     if (!element) {
       return null;
     }
-    const offset = element.element.offset();
+    const offset = element.offset();
     if (!offset) {
       return null;
     }
-    const width = element.element.width();
-    if (!width) {
-      return null;
-    }
-    const x =
-      element.posType === PosType.Left ? offset.left : offset.left + width;
+    const x = offset.left;
     return {
       x,
       y: offset.top,
-      posType: element.posType,
-      element: element.element,
+      element: element,
+      appendText: (text: string) => {
+        const line = this.getLine(cursor[0]);
+        if (!line) {
+          console.warn("Line not found", cursor[0]);
+          return;
+        }
+        if (line.text().trim().length === 0) {
+          line.text(text);
+          return;
+        }
+        const lineElement = this.getElementFromPos(line, cursor[1], false);
+        if (!lineElement) {
+          console.warn("Element not found", cursor[1]);
+          return;
+        }
+        const additionalText = $(`<span></span>`).text(text);
+        lineElement.append(additionalText);
+      },
     };
   }
 
@@ -84,27 +96,33 @@ export class DOMLines {
 
   private getElementFromPos(
     element: JQuery,
-    pos: number
-  ): { posType: PosType; element: JQuery } | null {
+    pos: number,
+    createMarker: boolean = true
+  ): JQuery | null {
     const children = element.children();
     if (pos === 0) {
-      return {
-        posType: PosType.Left,
-        element: element,
-      };
+      return element;
     }
     if (children.length === 0) {
-      if (pos === element.text().length) {
-        return {
-          posType: PosType.Right,
-          element: element,
-        };
-      }
-      if (!SUPPORT_COMPLETION_MARKER) {
-        return null;
-      }
       if (this.completionMarker) {
         this.completionMarker.remove();
+        this.completionMarker = null;
+      }
+      if (pos === element.text().length) {
+        if (!createMarker) {
+          return element;
+        }
+        this.completionMarker = $('<span id="completion-marker"></span>');
+        element.append(this.completionMarker);
+        return this.completionMarker;
+      }
+      if (!SUPPORT_COMPLETION_MARKER) {
+        console.warn(
+          "Completion marker is not supported",
+          pos,
+          element.text().length
+        );
+        return null;
       }
       const text = element.text();
       const beforeText = text.substring(0, pos);
@@ -112,10 +130,7 @@ export class DOMLines {
       const html = `${beforeText}<span id="completion-marker"></span>${afterText}`;
       element.html(html);
       this.completionMarker = $("#completion-marker");
-      return {
-        posType: PosType.Left,
-        element: this.completionMarker,
-      };
+      return this.completionMarker;
     }
     let offset = 0;
     for (let i = 0; i < children.length; i++) {

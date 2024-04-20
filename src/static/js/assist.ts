@@ -218,10 +218,10 @@ exports.aceEditEvent = (hook: string, context: AceEditEventContext) => {
     const absoluteX = containerOffset.left + x;
     const absoluteY = containerOffset.top + y;
     if (!completionMarker) {
-      completionMarker = $("<div>").addClass("codama-completion-marker");
+      completionMarker = $("<div>").addClass("kodama-completion-marker");
       editorContainer.append(completionMarker);
     }
-    completionMarker.removeClass("codama-completion-error").css({
+    completionMarker.removeClass("kodama-completion-error").css({
       left: absoluteX,
       top: absoluteY,
     });
@@ -239,7 +239,7 @@ exports.aceEditEvent = (hook: string, context: AceEditEventContext) => {
         completionResult = data.result;
         completionMarker
           .text(data.result)
-          .removeClass("codama-completion-error");
+          .removeClass("kodama-completion-error");
       })
       .catch((err) => {
         console.error(logPrefix, "Failed to get completion", err);
@@ -248,7 +248,7 @@ exports.aceEditEvent = (hook: string, context: AceEditEventContext) => {
         }
         completionMarker
           .text("Failed to get completion")
-          .addClass("codama-completion-error");
+          .addClass("kodama-completion-error");
       });
   }, TIME_TO_WAIT_FOR_COMPLETION);
 };

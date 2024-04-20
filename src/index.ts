@@ -19,7 +19,7 @@ exports.registerRoute = (
   cb: (next: any) => void
 ) => {
   const { app } = args;
-  app.get("/codama/completion", (req, res) => {
+  app.get("/kodama/completion", (req, res) => {
     const { query } = req.query;
     if (!query) {
       res.status(400).send("query is required");

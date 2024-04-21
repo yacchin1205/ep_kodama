@@ -208,6 +208,41 @@ function attachKeyPressHandler(context: AceEditEventContext) {
   keyPressHandlerAttached = true;
 }
 
+function getOpenAIError(err: any): {
+  status: number;
+  code?: string;
+  error?: {
+    message?: string;
+  };
+} | null {
+  if (err.status !== 500) {
+    return null;
+  }
+  const { responseJSON } = err;
+  if (responseJSON === undefined) {
+    return null;
+  }
+  if (responseJSON.status === undefined) {
+    return null;
+  }
+  return responseJSON;
+}
+
+function createCompletionLabel(result: string) {
+  const content = $("<span>")
+    .addClass("kodama-completion-result-content")
+    .text(result);
+  const help = $("<span>")
+    .addClass("kodama-completion-result-help")
+    .html(
+      "Press <span class='kodama-key'>SHIFT</span>+<span class='kodama-key'>TAB</span> to apply"
+    );
+  return $("<span>")
+    .addClass("kodama-completion-result")
+    .append(content)
+    .append(help);
+}
+
 exports.postAceInit = (hook: any, context: PostAceInitContext) => {
   const { ace } = context;
   console.debug(logPrefix, "AceEditor", ace);
@@ -280,10 +315,34 @@ exports.aceEditEvent = (hook: string, context: AceEditEventContext) => {
         }
         completionResult = data.result;
         completionMarker
-          .text(data.result)
+          .empty()
+          .append(createCompletionLabel(data.result))
           .removeClass("kodama-completion-error");
       })
       .catch((err) => {
+        const openAIError = getOpenAIError(err);
+        if (openAIError !== null) {
+          console.error(
+            logPrefix,
+            "Failed to get completion (OpenAI)",
+            openAIError
+          );
+          if (!completionMarker) {
+            return;
+          }
+          let message = "Unknown error";
+          if (openAIError.error?.message) {
+            message = openAIError.error.message;
+          } else if (openAIError.code) {
+            message = openAIError.code;
+          } else {
+            message = `Status code: ${openAIError.status}`;
+          }
+          completionMarker
+            .text("OpenAI API error: " + message)
+            .addClass("kodama-completion-error");
+          return;
+        }
         console.error(logPrefix, "Failed to get completion", err);
         if (!completionMarker) {
           return;

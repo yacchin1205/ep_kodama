@@ -11,7 +11,9 @@ ep_kodama provides the feature to all users of Etherpad, empowering collaborativ
 
 # How to try
 
-Use docker-compose to try ep_kodama. Run the container as described below and access http://localhost:9001 .
+Use docker-compose to try ep_kodama.
+First, set the `apiKey` in `demo/settings.json` to the API key obtained from OpenAI.
+Then run the container as described below and access http://localhost:9001 .
 Then click the [New Pad] button to create a new page.
 
 ```

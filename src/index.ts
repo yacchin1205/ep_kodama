@@ -1,9 +1,11 @@
 import settings from "ep_etherpad-lite/node/utils/Settings";
 import { ExpressCreateServerArgs } from "ep_etherpad-lite/hooks";
+import { urlencoded } from "express";
+import { CompletionQuery } from "./completion/base";
 
 const logPrefix = "[ep_kodama]";
 
-async function completion(query: string): Promise<string> {
+async function completion(query: CompletionQuery): Promise<string> {
   const pluginSettings = settings.ep_kodama || {};
   if (pluginSettings.api === "openai") {
     const { OpenAICompletionService } = require("./completion/openai");
@@ -19,15 +21,23 @@ exports.registerRoute = (
   cb: (next: any) => void
 ) => {
   const { app } = args;
-  app.get("/kodama/completion", (req, res) => {
-    const { query } = req.query;
-    if (!query) {
+  app.post("/kodama/completion", urlencoded(), (req, res) => {
+    const { query: queryString } = req.body;
+    if (!queryString || typeof queryString !== "string") {
       res.status(400).send("query is required");
       return;
     }
+    try {
+      JSON.parse(queryString);
+    } catch (err) {
+      console.error(logPrefix, err, queryString);
+      res.status(400).send("query must be a valid JSON");
+      return;
+    }
+    const query = JSON.parse(queryString) as CompletionQuery;
     console.log(logPrefix, "performing completion...", query);
 
-    completion(query.toString())
+    completion(query)
       .then((result) => {
         res.send({
           query,

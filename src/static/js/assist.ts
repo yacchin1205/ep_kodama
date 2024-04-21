@@ -5,12 +5,17 @@ import {
 } from "ep_etherpad-lite/hooks";
 import { DOMLines } from "./lines";
 import { getAceEditorOffset } from "./ace";
-import { requestCompletion } from "./completion";
+import {
+  requestCompletion,
+  CompletionQuery,
+  CompletionContentType,
+  CompletionContent,
+} from "./completion";
 
 const logPrefix = "[ep_kodama/hashview]";
 
 type CompletionContext = {
-  query: string;
+  query: CompletionQuery;
   cursor: number[];
 };
 
@@ -43,6 +48,7 @@ export function analyzeLines(
     return null;
   }
   let text: string | null = "";
+  const content: CompletionContent[] = [];
   alltext.split("\n").forEach((line, index) => {
     if (text === null) {
       return;
@@ -82,17 +88,53 @@ export function analyzeLines(
     }
     if (!author) {
       text += `${mline}\n`;
+    } else {
+      text += `${author[1]}: ${mline}\n`;
+    }
+    const img = attribs.find((attr) => attr && attr[0] === "img");
+    if (!img) {
       return;
     }
-    text += `${author[1]}: ${mline}\n`;
+    // Push image
+    content.push({
+      type: CompletionContentType.Text,
+      value: text,
+    });
+    text = "";
+    content.push({
+      type: CompletionContentType.Image,
+      value: img[1],
+    });
   });
   if (text === null) {
     return null;
   }
   return {
-    query: text,
+    query: {
+      content: content.concat([
+        {
+          type: CompletionContentType.Text,
+          value: text,
+        },
+      ]),
+    },
     cursor: [selStart[0], selStart[1]],
   };
+}
+
+function completionQueryEquals(a: CompletionQuery, b: CompletionQuery) {
+  if (a.content.length !== b.content.length) {
+    return false;
+  }
+  for (let i = 0; i < a.content.length; i++) {
+    if (a.content[i].type !== b.content[i].type) {
+      return false;
+    }
+    if (a.content[i].value !== b.content[i].value) {
+      return false;
+    }
+  }
+  return true;
 }
 
 function completionContextEquals(
@@ -106,7 +148,7 @@ function completionContextEquals(
     return false;
   }
   return (
-    a.query === b.query &&
+    completionQueryEquals(a.query, b.query) &&
     a.cursor[0] === b.cursor[0] &&
     a.cursor[1] === b.cursor[1]
   );

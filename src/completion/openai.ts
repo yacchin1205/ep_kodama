@@ -1,6 +1,62 @@
 import OpenAI from "openai";
 
 import { PluginSettings } from "./settings";
+import {
+  CompletionContent,
+  CompletionContentType,
+  CompletionQuery,
+} from "./base";
+import { ChatCompletionContentPart } from "openai/resources";
+import { APIModel } from "ep_etherpad-lite/node/utils/Settings";
+
+const DEFAULT_API_MODEL = "gpt-3.5-turbo";
+
+function convertCompletionContent(
+  content: CompletionContent
+): ChatCompletionContentPart {
+  switch (content.type) {
+    case CompletionContentType.Text:
+      return { type: "text", text: content.value };
+    case CompletionContentType.Image:
+      return {
+        type: "image_url",
+        image_url: {
+          url: content.value,
+          detail: "high",
+        },
+      };
+    default:
+      throw new Error(`Unsupported content type: ${content.type}`);
+  }
+}
+
+function resolveAPIModel(
+  apiModel: string | APIModel | undefined,
+  needsImage: boolean
+): {
+  apiModelName: string;
+  imageSupport: boolean;
+} {
+  if (apiModel === undefined) {
+    return { apiModelName: DEFAULT_API_MODEL, imageSupport: false };
+  }
+  if (typeof apiModel === "string") {
+    return {
+      apiModelName: apiModel,
+      imageSupport: false,
+    };
+  }
+  if (needsImage && apiModel.forImage) {
+    return {
+      apiModelName: apiModel.forImage,
+      imageSupport: true,
+    };
+  }
+  return {
+    apiModelName: apiModel.default,
+    imageSupport: false,
+  };
+}
 
 export class OpenAICompletionService {
   private pluginSettings: PluginSettings;
@@ -9,12 +65,26 @@ export class OpenAICompletionService {
     this.pluginSettings = pluginSettings;
   }
 
-  async completion(query: string): Promise<string> {
+  async completion(query: CompletionQuery): Promise<string> {
     const openai = new OpenAI({
       apiKey: this.pluginSettings.apiKey,
     });
+    const { apiModel } = this.pluginSettings;
+    const imageIncludes = query.content.some(
+      (c) => c.type === CompletionContentType.Image
+    );
+    const { apiModelName, imageSupport } = resolveAPIModel(
+      apiModel,
+      imageIncludes
+    );
+    if (imageIncludes && !imageSupport) {
+      console.info(
+        "Image support is not enabled for the current model. Ignore images.",
+        apiModel
+      );
+    }
     const completion = await openai.chat.completions.create({
-      model: this.pluginSettings.apiModel || "gpt-3.5-turbo",
+      model: apiModelName,
       messages: [
         {
           role: "system",
@@ -26,9 +96,19 @@ export class OpenAICompletionService {
     - <input lines here>: Generate about 1-3 sentences of lines that should be inserted in this marker section.
     
     Note that a.XXX means the author of the statement.
+    If an image is attached as part of the input, please consider the content of that image in your suggestion.
     `,
         },
-        { role: "user", content: query.toString() },
+        {
+          role: "user",
+          content: query.content
+            .filter(
+              (c) =>
+                c.type === CompletionContentType.Text ||
+                (c.type === CompletionContentType.Image && imageSupport)
+            )
+            .map((c) => convertCompletionContent(c)),
+        },
       ],
     });
     const result = completion.choices[0].message.content;

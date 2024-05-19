@@ -23,5 +23,5 @@ RUN bin/installDeps.sh && rm -rf ~/.npm && \
         pnpm run install-plugins ${ETHERPAD_LOCAL_PLUGINS:+--path ${ETHERPAD_LOCAL_PLUGINS}}; \
     fi
 # Workaround for Error: Cannot find module 'web-streams-polyfill'(maybe version conflict)
-RUN cd /opt/etherpad-lite/src && pnpm i web-streams-polyfill@3.3.3
+RUN cd /opt/etherpad-lite/src && pnpm i web-streams-polyfill@3.3.3 sharp@latest
 COPY --chown=etherpad demo/installed_plugins.json /opt/etherpad-lite/var/

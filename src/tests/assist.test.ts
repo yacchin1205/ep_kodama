@@ -16,7 +16,14 @@ describe("analyzeLines", () => {
     };
     expect(analyzeLines(author, rep)).toStrictEqual({
       cursor: [0, 0],
-      query: "A: <input lines here>\n",
+      query: {
+        content: [
+          {
+            type: "text",
+            value: "A: <input lines here>\n",
+          },
+        ],
+      },
     });
   });
   test("whitespaces", () => {
@@ -33,7 +40,14 @@ describe("analyzeLines", () => {
     };
     expect(analyzeLines(author, rep)).toStrictEqual({
       cursor: [0, 0],
-      query: "A: <input lines here>    \n",
+      query: {
+        content: [
+          {
+            type: "text",
+            value: "A: <input lines here>    \n",
+          },
+        ],
+      },
     });
   });
   test("inputting", () => {

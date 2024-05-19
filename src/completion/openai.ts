@@ -9,6 +9,8 @@ import {
 import { ChatCompletionContentPart } from "openai/resources";
 import { APIModel } from "ep_etherpad-lite/node/utils/Settings";
 
+const logPrefix = "[ep_kodama]";
+
 const DEFAULT_API_MODEL = "gpt-3.5-turbo";
 
 function convertCompletionContent(
@@ -83,6 +85,9 @@ export class OpenAICompletionService {
         apiModel
       );
     }
+    console.debug(logPrefix, "OpenAI model:", apiModelName);
+    console.debug(logPrefix, "Image support:", imageSupport);
+    console.debug(logPrefix, "Query:", query);
     const completion = await openai.chat.completions.create({
       model: apiModelName,
       messages: [
@@ -115,7 +120,7 @@ export class OpenAICompletionService {
     if (!result) {
       throw new Error("OpenAI response is empty");
     }
-    console.log("OpenAI response:", result);
+    console.debug("OpenAI response:", result);
     return result;
   }
 }

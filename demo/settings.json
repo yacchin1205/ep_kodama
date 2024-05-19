@@ -658,6 +658,16 @@
       "default": "gpt-4",
       "forImage": "gpt-4-vision-preview"
     },
-    "apiKey": "DUMMY_TOKEN"
+    "apiKey": "DUMMY_TOKEN",
+    "compaction": {
+      "maxImageSize": {
+        "width": 480,
+        "height": 480
+      },
+      "maxContentLength": {
+        "beforeLength": 20480,
+        "afterLength": 1024
+      }
+    }
   }
 }

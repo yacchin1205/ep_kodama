@@ -17,11 +17,9 @@ ARG ETHERPAD_PLUGINS="ep_align ep_markdown ep_embedded_hyperlinks2 ep_font_color
 ARG ETHERPAD_LOCAL_PLUGINS="/tmp/ep_kodama/"
 RUN bin/installDeps.sh && rm -rf ~/.npm && \
     if [ ! -z "${ETHERPAD_PLUGINS}" ]; then \
-        pnpm run install-plugins ${ETHERPAD_PLUGINS}; \
+        pnpm run plugins i ${ETHERPAD_PLUGINS}; \
     fi && \
     if [ ! -z "${ETHERPAD_LOCAL_PLUGINS}" ]; then \
-        pnpm run install-plugins ${ETHERPAD_LOCAL_PLUGINS:+--path ${ETHERPAD_LOCAL_PLUGINS}}; \
+        pnpm run plugins i ${ETHERPAD_LOCAL_PLUGINS:+--path ${ETHERPAD_LOCAL_PLUGINS}}; \
     fi
-# Workaround for Error: Cannot find module 'web-streams-polyfill'(maybe version conflict)
-RUN cd /opt/etherpad-lite/src && pnpm i web-streams-polyfill@3.3.3 sharp@latest
-COPY --chown=etherpad demo/installed_plugins.json /opt/etherpad-lite/var/
+RUN cd /opt/etherpad-lite/src && pnpm i "sharp@^0.33.4"

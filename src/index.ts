@@ -17,6 +17,15 @@ async function completion(query: CompletionQuery): Promise<string> {
     );
     return service.completion(query);
   }
+  if (pluginSettings.api === "gemini") {
+    const { GeminiCompletionService } = require("./completion/gemini");
+    const serviceCore = new GeminiCompletionService(pluginSettings);
+    const service = new CompletionServiceWithCompaction(
+      pluginSettings,
+      serviceCore
+    );
+    return service.completion(query);
+  }
   throw new Error(`Unknown API: ${pluginSettings.api}`);
 }
 

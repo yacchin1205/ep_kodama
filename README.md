@@ -4,7 +4,7 @@ ep_kodama is a plugin that can be added to etherpad to provide writing assistanc
 
 ![screenshot](./screenshot.gif)
 
-ep_kodama supports OpenAI as an LLM. Automatically guesses the continuation of a sentence and suggests candidate completions.
+ep_kodama supports OpenAI and Gemini as an LLM. Automatically guesses the continuation of a sentence and suggests candidate completions.
 Once ep_kodama is activated and you type a sentence with Etherpad, it will automatically suggest a candidate to follow. If that suggestion is appropriate, you can use Shift+TAB to type it in.
 
 ep_kodama provides the feature to all users of Etherpad, empowering collaborative document editing with real-time predictive typing.

@@ -28,13 +28,14 @@ docker-compose up -d
 To install ep_kodama, first, you need to install etherpad. Once Etherpad is installed, navigate to the root directory of etherpad and run the following command:
 
 ```
-pnpm i ep_kodama
+pnpm run plugins i ep_kodama
 ```
 
-Also, as a work-around for [known issue](https://github.com/yacchin1205/ep_kodama/issues/1), please do the following:
+Also, If you want to target images uploaded using ep_image_upload for completion, run the following command to install sharp.
 
 ```
-pnpm i web-streams-polyfill@3.3.3
+cd ./src # Change to the etherpad-lite/src directory
+pnpm i "sharp@^0.33.4"
 ```
 
 ## Configure the OpenAI API settings in the settings.json file

@@ -655,8 +655,8 @@
   "ep_kodama": {
     "api": "openai",
     "apiModel": {
-      "default": "gpt-4",
-      "forImage": "gpt-4-vision-preview"
+      "default": "gpt-4o",
+      "forImage": "gpt-4o"
     },
     "apiKey": "DUMMY_TOKEN",
     "compaction": {

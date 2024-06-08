@@ -50,6 +50,30 @@ describe("analyzeLines", () => {
       },
     });
   });
+  test("separator", () => {
+    const author = "A";
+    const rep = {
+      selStart: [0, 13],
+      selEnd: [0, 13],
+      alines: [],
+      alltext: "This is test.    ",
+      apool: {
+        numToAttrib: {},
+        attribToNum: {},
+      },
+    };
+    expect(analyzeLines(author, rep)).toStrictEqual({
+      cursor: [0, 13],
+      query: {
+        content: [
+          {
+            type: "text",
+            value: "A: This is test.<input words here>    \n",
+          },
+        ],
+      },
+    });
+  });
   test("inputting", () => {
     const author = "A";
     const rep = {

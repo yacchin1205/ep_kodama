@@ -67,6 +67,25 @@ Remember to replace `"your-api-key"` with your actual OpenAI API key. Save and c
 
 After install the plugin, restart the Etherpad service for the changes to take effect. Once restarted, the ep_kodama plugin should be active and ready to use.
 
+### Using Gemini
+
+ep_kodama also supports Google's Gemini API. To use it, set the `api` field to "gemini" and set the `apiKey` field to your API key.
+
+```
+  "ep_kodama": {
+    "api": "gemini",
+    "apiModel": "gemini-1.5-flash",
+    "apiKey": "your-api-key",
+    ...
+  }
+```
+
+For Gemini, also replace `"your-api-key"` with your actual API key of Google AI Studio. You can obtain an API key from the following link:
+
+https://aistudio.google.com/app/apikey
+
+After restarting the Etherpad service, ep_kodama should be ready to use with the Gemini API.
+
 ### Compaction
 
 To reduce the number of tokens sent to the LLM, ep_kodama can shorten text and reduce the size of images. This feature can be controlled using the `compaction` setting.

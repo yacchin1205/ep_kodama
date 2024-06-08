@@ -1,7 +1,7 @@
 {
   "name": "ep_kodama",
   "description": "Etherpad plug-ins that provide AI assistance",
-  "version": "0.1.4",
+  "version": "0.2.0",
   "author": {
     "name": "Satoshi Yazawa",
     "url": "https://github.com/yacchin1205/"

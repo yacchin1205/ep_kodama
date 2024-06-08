@@ -84,10 +84,8 @@ To reduce the number of tokens sent to the LLM, ep_kodama can shorten text and r
     }
 ```
 
-- **maxImageSize**: This setting controls the maximum size of images sent to the LLM. If the image is larger than this size, it will be resized to fit within these dimensions.
-- **maxContentLength**: This setting controls the maximum length of text sent to the LLM.
-  - **beforeLength**: This is the maximum length of the text before the cursor.
-  - **afterLength**: This is the maximum length of the text after the cursor.
+- **maxImageSize**: determines the maximum dimensions (width and height in pixels) to which images will be resized before being sent to the LLM.
+- **maxContentLength**: controls the length of the content sent before and after the marker. 'beforeLength' dictates the maximum amount of data(in String.length) sent before the marker, whereas 'afterLength' defines the maximum length of the data following the marker. When the data exceeds these limits, it will be trimmed to fit accordingly.
 
 ### Completion
 

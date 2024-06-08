@@ -17,8 +17,8 @@ Then run the container as described below and access http://localhost:9001 .
 Then click the [New Pad] button to create a new page.
 
 ```
-docker-compose build
-docker-compose up -d
+docker compose build
+docker compose up -d
 ```
 
 # How to install
@@ -46,8 +46,8 @@ After installing ep_kodama, you need to configure the OpenAI API settings. Open 
   "ep_kodama": {
     "api": "openai",
     "apiModel": {
-      "default": "gpt-4",
-      "forImage": "gpt-4-vision-preview"
+      "default": "gpt-4o",
+      "forImage": "gpt-4o"
     },
     "apiKey": "your-api-key",
     "compaction": (Optional. See below for details.),
@@ -58,7 +58,7 @@ After installing ep_kodama, you need to configure the OpenAI API settings. Open 
 The ep_kodama section can be given the following settings:
 
 - **api**: This indicates the language model provider. In this case, now it should be set to "openai."
-- **apiModel**: This is where you specify the model to use. The default value is "gpt-3.5-turbo," but you can change this to other available models like "gpt-4." ep_kodama supports images uploaded by [ep_image_upload](https://www.npmjs.com/package/ep_image_upload) and allows the use of image-based model like "gpt-4-vision-preview" with forImage property when an image is attached as part of the input in Etherpad. This means ep_kodama can also understand and generate suggestions based on the content of images.
+- **apiModel**: This is where you specify the model to use. The default value is "gpt-3.5-turbo," but you can change this to other available models like "gpt-4o." ep_kodama supports images uploaded by [ep_image_upload](https://www.npmjs.com/package/ep_image_upload) and allows the use of image-available model like "gpt-4o" with forImage property when an image is attached as part of the input in Etherpad. This means ep_kodama can also understand and generate suggestions based on the content of images.
 - **apiKey**: This is where you input your personal API key obtained from OpenAI, which allows you to use their language model.
 - **compaction**: This is a setting that controls the level of compaction of the suggestions. Details are described below.
 - **completion**: This is a setting that controls the level of completion of the suggestions. Details are described below.

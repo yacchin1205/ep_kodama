@@ -15,10 +15,16 @@ declare module "ep_etherpad-lite/node/utils/Settings" {
     };
   };
 
+  export type CompletionSettings = {
+    previousSeparator?: string;
+    waitSeconds?: number;
+  };
+
   export const ep_kodama: {
     api?: string;
     apiKey?: string;
     apiModel?: APIModel | string;
     compaction?: CompactionSettings;
+    completion?: CompletionSettings;
   };
 }

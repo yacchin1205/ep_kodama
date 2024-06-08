@@ -1,3 +1,4 @@
+import { CompletionSettings } from "ep_etherpad-lite/node/utils/Settings";
 import {
   AceEditEventContext,
   PostAceInitContext,
@@ -19,7 +20,13 @@ type CompletionContext = {
   cursor: number[];
 };
 
-const TIME_TO_WAIT_FOR_COMPLETION = 500;
+const DEFAULT_TIME_TO_WAIT_FOR_COMPLETION = 0.5;
+const DEFAULT_PREVIOUS_SEPARATOR = "[.,!?\"';:]$";
+
+let completionSettings: CompletionSettings = {
+  previousSeparator: DEFAULT_PREVIOUS_SEPARATOR,
+  waitSeconds: DEFAULT_TIME_TO_WAIT_FOR_COMPLETION,
+};
 
 let lastContext: CompletionContext | null = null;
 let lineDOMNodes: DOMLines = new DOMLines();
@@ -30,6 +37,45 @@ let lastCompletionLine: {
   appendText: (text: string) => void;
 } | null = null;
 let keyPressHandlerAttached = false;
+
+/**
+ * Load settings from the server.
+ */
+function loadSettings() {
+  $.get("/kodama/settings", (data) => {
+    console.debug(logPrefix, "Settings", data);
+    completionSettings = data.completion ?? {};
+  });
+}
+
+/**
+ * Check if the line is currently being edited.
+ * The following conditions are satisfied, it is considered *not* currently being edited.
+ *
+ * - The previous text from the cursor should be checked whether matched by the previousSeparator pattern
+ *   if the cursor is not at the beginning of the line.
+ * - The next text from the cursor should be checked whether it is empty.
+ *
+ * @param line the line text
+ * @param index the cursor position
+ * @returns whether the line is currently being edited
+ */
+function isCurrentlyEditing(line: string, index: number) {
+  const trimmed = line.trim();
+  if (trimmed.length === 0) {
+    return false;
+  }
+  const previous = line.substring(0, index);
+  const next = line.substring(index);
+  if (previous.trim().length > 0 && !/\s$/.test(previous)) {
+    const previousSeparator =
+      completionSettings?.previousSeparator ?? DEFAULT_PREVIOUS_SEPARATOR;
+    if (!new RegExp(previousSeparator).test(previous)) {
+      return true;
+    }
+  }
+  return next.trim().length > 0;
+}
 
 export function analyzeLines(
   currentAuthor: string,
@@ -63,17 +109,7 @@ export function analyzeLines(
     const author = attribs.find((attr) => attr && attr[0] === "author");
     let mline = line;
     if (index === selStart[0]) {
-      if (
-        selStart[1] > 0 &&
-        (line.substring(selStart[1] - 1).match(/^\S+.*/) ||
-          line.substring(selStart[1]).match(/^\S+.*/))
-      ) {
-        // currently editing
-        text = null;
-        return;
-      }
-      if (line.substring(selStart[1]).match(/^\S.*/)) {
-        // currently editing
+      if (isCurrentlyEditing(line, selStart[1])) {
         text = null;
         return;
       }
@@ -81,7 +117,7 @@ export function analyzeLines(
       const type = line.trim().length === 0 ? "lines" : "words";
       mline =
         (selStart[1] > 0
-          ? `${line.substring(0, selStart[1])}<input ${type} here>`
+          ? `${currentAuthor}: ${line.substring(0, selStart[1])}<input ${type} here>`
           : `${currentAuthor}: <input ${type} here>`) + nexttext;
       text += `${mline}\n`;
       return;
@@ -246,6 +282,7 @@ function createCompletionLabel(result: string) {
 exports.postAceInit = (hook: any, context: PostAceInitContext) => {
   const { ace } = context;
   console.debug(logPrefix, "AceEditor", ace);
+  loadSettings();
 };
 
 exports.aceEditEvent = (hook: string, context: AceEditEventContext) => {
@@ -351,7 +388,7 @@ exports.aceEditEvent = (hook: string, context: AceEditEventContext) => {
           .text("Failed to get completion")
           .addClass("kodama-completion-error");
       });
-  }, TIME_TO_WAIT_FOR_COMPLETION);
+  }, (completionSettings.waitSeconds ?? DEFAULT_TIME_TO_WAIT_FOR_COMPLETION) * 1000);
 };
 
 exports.acePostWriteDomLineHTML = (hook: any, context: any) => {

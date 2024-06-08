@@ -49,7 +49,9 @@ After installing ep_kodama, you need to configure the OpenAI API settings. Open 
       "default": "gpt-4",
       "forImage": "gpt-4-vision-preview"
     },
-    "apiKey": "your-api-key"
+    "apiKey": "your-api-key",
+    "compaction": (Optional. See below for details.),
+    "completion": (Optional. See below for details.)
   }
 ```
 
@@ -58,7 +60,45 @@ The ep_kodama section can be given the following settings:
 - **api**: This indicates the language model provider. In this case, now it should be set to "openai."
 - **apiModel**: This is where you specify the model to use. The default value is "gpt-3.5-turbo," but you can change this to other available models like "gpt-4." ep_kodama supports images uploaded by [ep_image_upload](https://www.npmjs.com/package/ep_image_upload) and allows the use of image-based model like "gpt-4-vision-preview" with forImage property when an image is attached as part of the input in Etherpad. This means ep_kodama can also understand and generate suggestions based on the content of images.
 - **apiKey**: This is where you input your personal API key obtained from OpenAI, which allows you to use their language model.
+- **compaction**: This is a setting that controls the level of compaction of the suggestions. Details are described below.
+- **completion**: This is a setting that controls the level of completion of the suggestions. Details are described below.
 
 Remember to replace `"your-api-key"` with your actual OpenAI API key. Save and close the file once you have added your key.
 
 After install the plugin, restart the Etherpad service for the changes to take effect. Once restarted, the ep_kodama plugin should be active and ready to use.
+
+### Compaction
+
+To reduce the number of tokens sent to the LLM, ep_kodama can shorten text and reduce the size of images. This feature can be controlled using the `compaction` setting.
+
+```
+    "compaction": {
+      "maxImageSize": {
+        "width": 480,
+        "height": 480
+      },
+      "maxContentLength": {
+        "beforeLength": 20480,
+        "afterLength": 1024
+      }
+    }
+```
+
+- **maxImageSize**: This setting controls the maximum size of images sent to the LLM. If the image is larger than this size, it will be resized to fit within these dimensions.
+- **maxContentLength**: This setting controls the maximum length of text sent to the LLM.
+  - **beforeLength**: This is the maximum length of the text before the cursor.
+  - **afterLength**: This is the maximum length of the text after the cursor.
+
+### Completion
+
+This setting controls when ep_kodama starts completion during text input.
+
+```
+    "completion": {
+      "previousSeparator": ".$",
+      "waitSeconds": 1
+    }
+```
+
+- **previousSeparator**: This setting controls the separator that triggers the completion. ep_kodama will start suggesting completions when the text before the cursor ends with this separator.
+- **waitSeconds**: This setting controls the time to wait before starting the completion. ep_kodama will start suggesting completions after this time has passed since the last keypress.

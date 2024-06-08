@@ -26,6 +26,11 @@ exports.registerRoute = (
   cb: (next: any) => void
 ) => {
   const { app } = args;
+  app.get("/kodama/settings", (req, res) => {
+    res.send({
+      completion: settings.ep_kodama?.completion || {},
+    });
+  });
   app.post("/kodama/completion", urlencoded(), (req, res) => {
     const { query: queryString } = req.body;
     if (!queryString || typeof queryString !== "string") {
